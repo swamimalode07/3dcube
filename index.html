@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Background Integration</title>
+    <style>
+        body, html {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Ensure the canvas covers the entire background */
+        #background-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        /* Style for the content over the Three.js background */
+        .content {
+            position: relative;
+            z-index: 1;
+            color: rgb(68, 68, 68);
+            padding: 20px;
+            text-align: center;
+            font-size: 2em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Content that will appear over the Three.js background -->
+    <div class="content">
+        <h1>Three.js</h1>
+        <p>This content is placed over a Three.js background!</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script>
+        // Create scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.domElement.id = 'background-canvas';
+        document.body.appendChild(renderer.domElement);
+
+        // Add a simple geometry (a cube) to the scene
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        // Add edges to the cube
+        const edges = new THREE.EdgesGeometry(geometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+        const line = new THREE.LineSegments(edges, lineMaterial);
+        scene.add(line);
+
+        // Position the camera
+        camera.position.z = 5;
+
+        // Track mouse position
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // Update mouse position on move
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Animate the scene and rotate the cube based on mouse position
+        function animate() {
+            requestAnimationFrame(animate);
+
+            cube.rotation.x = mouseY * Math.PI;
+            cube.rotation.y = mouseX * Math.PI;
+
+            line.rotation.x = mouseY * Math.PI;
+            line.rotation.y = mouseX * Math.PI;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Adjust canvas size when window is resized
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>
